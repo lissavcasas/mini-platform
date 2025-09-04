@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mini_platform/jornada_table_view.dart';
+import 'package:mini_platform/features/shifts/presentation/pages/shift_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,15 +10,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        resizeToAvoidBottomInset: true,
-        appBar: AppBar(
-          title: const Text('Jornadas'),
-        ),
-        body: const JornadaTableView(),
-      ),
+      home: ShiftPage(),
     );
   }
 }

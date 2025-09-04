@@ -1,4 +1,4 @@
-const String sourceJson = '''
+const String dataMock = '''
 [
     {
         "colaborador": "Alexia Díaz",
