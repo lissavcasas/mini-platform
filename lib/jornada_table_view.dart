@@ -14,61 +14,85 @@ class JornadaTableView extends StatefulWidget {
 class _JornadaTableViewState extends State<JornadaTableView> {
   final TextEditingController searchController = TextEditingController();
 
+  late final List<Jornada> _allJornadas;
+  late List<Jornada> _filteredJornadas;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Trae data mock (source)
+    final decoded = jsonDecode(sourceJson) as List;
+
+    // Ordena por fecha DESC
+    _allJornadas = decoded.map((e) => Jornada.fromJson(e)).toList()
+      ..sort((a, b) => b.fecha.compareTo(a.fecha));
+    _filteredJornadas = List.of(_allJornadas);
+
+    // Escucha cambios en el controller
+    searchController.addListener(handleSearch);
+  }
+
+  void handleSearch() {
+    final search = searchController.text.trim().toUpperCase();
+
+    setState(() {
+      if (search.isEmpty) {
+        _filteredJornadas = List.of(_allJornadas);
+      } else {
+        _filteredJornadas = _allJornadas.where((jornada) {
+          final worker = jornada.colaborador.toUpperCase();
+          return worker.contains(search);
+        }).toList();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    searchController.removeListener(handleSearch);
+    searchController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final decoded = jsonDecode(sourceJson) as List;
-    final jornadas = decoded.map((e) => Jornada.fromJson(e)).toList();
-
-    // Sort DESC by fecha
-    jornadas.sort((a, b) => b.fecha.compareTo(a.fecha));
-
-    void handleSearch(String query) {
-      final search = query.toUpperCase();
-      // final searchController = searchController.text();
-
-      for (var jornada in jornadas) {
-        if (jornada.colaborador.toUpperCase().contains(search)) {
-          print("Response: ${jornada.colaborador}");
-        }
-      }
-    }
-
     return Column(
       children: [
         // Buscador
         TextField(
           controller: searchController,
           decoration: const InputDecoration(
-            hintText: 'Search...',
+            hintText: 'Buscar colaborador...',
             prefixIcon: Icon(Icons.search),
           ),
-          onChanged: handleSearch,
         ),
         const SizedBox(height: 10),
         // Tabla
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: DataTable(
-            columns: const [
-              DataColumn(label: Text('Colaborador')),
-              DataColumn(label: Text('Fecha')),
-              DataColumn(label: Text('Turno teórico (HH:mm–HH:mm)')),
-              DataColumn(label: Text('Inicio de jornada')),
-              DataColumn(label: Text('Fin de jornada')),
-            ],
-            rows: jornadas
-                .map(
-                  (jornada) => DataRow(
-                    cells: [
-                      DataCell(Text(jornada.colaborador)),
-                      DataCell(Text(jornada.fecha)),
-                      DataCell(Text(jornada.inicioTeorico)),
-                      DataCell(Text(jornada.inicioReal)),
-                      DataCell(Text(jornada.finReal)),
-                    ],
-                  ),
-                )
-                .toList(),
+        Expanded(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: DataTable(
+              columns: const [
+                DataColumn(label: Text('Colaborador')),
+                DataColumn(label: Text('Fecha')),
+                DataColumn(label: Text('Turno teórico (HH:mm–HH:mm)')),
+                DataColumn(label: Text('Inicio de jornada')),
+                DataColumn(label: Text('Fin de jornada')),
+              ],
+              rows: _filteredJornadas.map((jornada) {
+                return DataRow(
+                  cells: [
+                    DataCell(Text(jornada.colaborador)),
+                    DataCell(Text(jornada.fecha)),
+                    DataCell(
+                        Text('${jornada.inicioTeorico}–${jornada.finTeorico}')),
+                    DataCell(Text(jornada.inicioReal)),
+                    DataCell(Text(jornada.finReal)),
+                  ],
+                );
+              }).toList(),
+            ),
           ),
         ),
       ],
