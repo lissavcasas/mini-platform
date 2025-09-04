@@ -20,6 +20,7 @@ class _ShiftViewState extends State<ShiftView> {
   bool _loading = true;
   String? _error;
   Timer? _debounce;
+  bool _searching = false;
 
   @override
   void initState() {
@@ -46,10 +47,14 @@ class _ShiftViewState extends State<ShiftView> {
   void _onQueryChanged() {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 250), () async {
+      setState(() => _searching = true);
       final filtered =
           await widget.repo.searchByColaborador(searchController.text);
       if (!mounted) return;
-      setState(() => _items = filtered);
+      setState(() {
+        _items = filtered;
+        _searching = false;
+      });
     });
   }
 
@@ -66,11 +71,58 @@ class _ShiftViewState extends State<ShiftView> {
     if (_loading) return const Center(child: CircularProgressIndicator());
     if (_error != null) return Center(child: Text('Error: $_error'));
 
+    final hasQuery = searchController.text.trim().isNotEmpty;
+    final noResults = hasQuery && _items.isEmpty;
+
     return Column(
       children: [
         SearchTextField(controller: searchController),
         const SizedBox(height: 10),
-        Expanded(child: ShiftTable(items: _items)),
+        Expanded(
+          child: Stack(
+            children: [
+              SingleChildScrollView(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: ShiftTable(items: _items),
+                ),
+              ),
+              // No coincidences
+              if (hasQuery && (_searching || noResults))
+                IgnorePointer(
+                  ignoring: true,
+                  child: Builder(
+                    builder: (context) {
+                      final insets =
+                          MediaQuery.of(context).viewInsets.bottom; // teclado
+                      final safe =
+                          MediaQuery.of(context).padding.bottom; // notch
+                      final bottomPad =
+                          (insets > 0 ? insets : safe + 24.0); // dinámico
+
+                      final msg = _searching
+                          ? 'No se encontraron coincidencias'
+                          : 'No hay registros disponibles';
+
+                      return Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Padding(
+                          padding: EdgeInsets.only(bottom: bottomPad),
+                          child: Text(
+                            msg,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              // Empty list
+              if (!hasQuery && _items.isEmpty)
+                const Text('No hay registros disponibles'),
+            ],
+          ),
+        ),
       ],
     );
   }

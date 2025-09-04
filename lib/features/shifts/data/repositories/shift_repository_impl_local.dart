@@ -23,6 +23,7 @@ class ShiftRepositoryImplLocal implements ShiftRepository {
   Future<List<Shift>> searchByColaborador(String query) async {
     final all = await getAll();
     final q = query.trim().toUpperCase();
+
     if (q.isEmpty) return all;
     return all.where((j) => j.colaborador.toUpperCase().contains(q)).toList();
   }
