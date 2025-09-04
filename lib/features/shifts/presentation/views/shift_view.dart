@@ -5,6 +5,7 @@ import 'package:mini_platform/features/shifts/domain/entities/shift.dart';
 import 'package:mini_platform/features/shifts/domain/repositories/shift_repository.dart';
 import 'package:mini_platform/features/shifts/presentation/widgets/search_text_field.dart';
 import 'package:mini_platform/features/shifts/presentation/widgets/shift_table.dart';
+import 'package:mini_platform/features/shifts/utils/shift_strings.dart';
 
 class ShiftView extends StatefulWidget {
   const ShiftView({super.key, required this.repo});
@@ -101,8 +102,8 @@ class _ShiftViewState extends State<ShiftView> {
                           (insets > 0 ? insets : safe + 24.0); // dinámico
 
                       final msg = _searching
-                          ? 'No se encontraron coincidencias'
-                          : 'No hay registros disponibles';
+                          ? ShiftStrings.noResults
+                          : ShiftStrings.emptyList;
 
                       return Align(
                         alignment: Alignment.bottomCenter,
@@ -119,7 +120,7 @@ class _ShiftViewState extends State<ShiftView> {
                 ),
               // Empty list
               if (!hasQuery && _items.isEmpty)
-                const Text('No hay registros disponibles'),
+                const Text(ShiftStrings.emptyList),
             ],
           ),
         ),
