@@ -1,12 +1,12 @@
-class Jornada {
+class Shift {
   final String colaborador;
-  final String fecha; //DateTime
+  final String fecha;
   final String inicioTeorico;
   final String finTeorico;
   final String inicioReal;
   final String finReal;
 
-  Jornada({
+  Shift({
     required this.colaborador,
     required this.fecha,
     required this.inicioTeorico,
@@ -15,10 +15,10 @@ class Jornada {
     required this.finReal,
   });
 
-  factory Jornada.fromJson(Map<String, dynamic> json) {
-    return Jornada(
+  factory Shift.fromJson(Map<String, dynamic> json) {
+    return Shift(
       colaborador: json['colaborador'],
-      fecha: json['fecha'], //DateTime.parse(json['fecha']),
+      fecha: json['fecha'],
       inicioTeorico: json['inicioTeorico'],
       finTeorico: json['finTeorico'],
       inicioReal: json['inicioReal'],
@@ -29,7 +29,7 @@ class Jornada {
   Map<String, dynamic> toJson() {
     return {
       'colaborador': colaborador,
-      'fecha': fecha, //.toIso8601String().split('T')[0], // yyyy-MM-dd
+      'fecha': fecha,
       'inicioTeorico': inicioTeorico,
       'finTeorico': finTeorico,
       'inicioReal': inicioReal,
